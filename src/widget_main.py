@@ -3,19 +3,22 @@ import librosa
 import PyQt5.QtWidgets as QW
 from widget_signal import SignalWidget
 
+ICON = './../data/icon_file/'
+
 
 class MainWindow(QW.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         # widget
         self.w0 = QW.QWidget()
+        self.w_signal = SignalWidget()
         self.le_wav_path = QW.QLineEdit()
         self.btn_plot = QW.QPushButton('plot')
-        self.w_signal = SignalWidget()
-        self.action_add_region = QW.QAction(:wwq) <-----sldafjaslkjf
+        self.btn_calc = QW.QPushButton('calc')
 
         # event
         self.btn_plot.clicked.connect(self.clicked_btn_plot)
+        # self.btn_calc.clicked.connect(self.hoge)
 
         # init method
         self.init_widget()
@@ -29,6 +32,7 @@ class MainWindow(QW.QMainWindow):
         vbox0 = QW.QVBoxLayout()
         vbox0.addWidget(self.w_signal)
         vbox0.addLayout(hbox0)
+        vbox0.addWidget(self.btn_calc)
         self.w0.setLayout(vbox0)
 
     def clicked_btn_plot(self):
