@@ -15,7 +15,6 @@ class SignalWidget(QW.QWidget):
         self.pg_signal = self.p_pg_signal.plot(pen=('#0F8EBB50'))
 
         self.init_widget()
-        self.update_plot()
 
     def init_widget(self):
         self.w_pg_signal.setBackground('#FFFFFF00')

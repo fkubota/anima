@@ -1,25 +1,22 @@
 import sys
-import numpy as np
 import librosa
 import PyQt5.QtWidgets as QW
-import pyqtgraph as pg
+from widget_main import MainWindow
 
 
-class SignalWidget(QW.QMainWindow):
-    def __init__(self, parent=None):
-        super(SignalWidget, self).__init__(parent)
-        # widget
-        self.w0 = QW.QWidget()
+class ISedPyqt5(MainWindow):
+    def __inint__(self, parent=None):
+        super(ISedPyqt5, self).__init__(parent)
+
+        self.target_region = []
 
 
 def main():
     app = QW.QApplication(sys.argv)
 
+    w = ISedPyqt5()
     filename = librosa.util.example_audio_file()
-    data, sr = librosa.load(filename, sr=None)
-    w = SignalWidget()
-    w.set_signal(data, sr)
-
+    w.le_wav_path.setText(filename)
     w.show()
     sys.exit(app.exec_())
 
