@@ -5,17 +5,14 @@ import PyQt5.QtWidgets as QW
 import pyqtgraph as pg
 
 
-class SignalWidget(QW.QMainWindow):
+# class SignalWidget(QW.QMainWindow):
+class SignalWidget(QW.QWidget):
     def __init__(self, parent=None):
         super(SignalWidget, self).__init__(parent)
         # widget
-        self.w0 = QW.QWidget()
         self.w_pg_signal = pg.GraphicsWindow()
         self.p_pg_signal = self.w_pg_signal.addPlot()
-        # self.pg_signal = pg.ScatterPlotItem()
         self.pg_signal = self.p_pg_signal.plot(pen=('#0F8EBB50'))
-        self.x = np.arange(0, 10, 0.01)
-        self.y = np.sin(self.x)
 
         self.init_widget()
         self.update_plot()
@@ -27,10 +24,9 @@ class SignalWidget(QW.QMainWindow):
         self.p_pg_signal.addItem(self.pg_signal)
 
         # layout
-        self.setCentralWidget(self.w0)
         hbox0 = QW.QHBoxLayout()
         hbox0.addWidget(self.w_pg_signal)
-        self.w0.setLayout(hbox0)
+        self.setLayout(hbox0)
 
     def update_plot(self):
         self.pg_signal.setData(self.x, self.y)
