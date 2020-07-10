@@ -9,12 +9,16 @@ ICON = './../data/icon_file/'
 class MainWindow(QW.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+
+        self.signal = 0
+        self.sr = 0
+
         # widget
         self.w0 = QW.QWidget()
         self.w_signal = SignalWidget()
         self.le_wav_path = QW.QLineEdit()
         self.btn_plot = QW.QPushButton('plot')
-        self.btn_calc = QW.QPushButton('calc')
+        self.btn_recommend = QW.QPushButton('recommend')
 
         # event
         self.btn_plot.clicked.connect(self.clicked_btn_plot)
@@ -32,7 +36,7 @@ class MainWindow(QW.QMainWindow):
         vbox0 = QW.QVBoxLayout()
         vbox0.addWidget(self.w_signal)
         vbox0.addLayout(hbox0)
-        vbox0.addWidget(self.btn_calc)
+        vbox0.addWidget(self.btn_recommend)
         self.w0.setLayout(vbox0)
 
     def clicked_btn_plot(self):
@@ -40,8 +44,8 @@ class MainWindow(QW.QMainWindow):
         textboxに入力されているパスの音声ファイルをロードし、プロット
         '''
         path = self.le_wav_path.text()
-        data, sr = librosa.load(path, sr=None)
-        self.w_signal.set_signal(data, sr)
+        self.signal, self.sr = librosa.load(path, sr=None)
+        self.w_signal.set_signal(self.signal, self.sr)
 
 
 def main():
