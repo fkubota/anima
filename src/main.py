@@ -37,7 +37,13 @@ class ISedPyqt5(MainWindow):
 
     def recommend(self):
         print('\n--- recommend')
-        self.get_recommend_sec()
+        recommend_sec_list = self.get_recommend_sec()
+        half_region = self.segment_length_sec/2
+
+        for rcmd_sec in recommend_sec_list:
+            a = pg.LinearRegionItem(brush='AAAAAA20')
+            a.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
+            self.w_signal.p_pg_signal.addItem(a)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')
