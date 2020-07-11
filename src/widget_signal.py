@@ -14,25 +14,35 @@ class WidgetSignal(QW.QWidget):
         self.p_pg1 = self.w_pg_signal.addPlot(row=2, col=0)
         self.pg_signal0 = self.p_pg0.plot(pen=('#0F8EBB50'))
         self.pg_signal1 = self.p_pg1.plot(pen=('#0F8EBB50'))
+        self.focus_region = pg.LinearRegionItem(brush='FAB62A05', pen=None)
 
         self.init_ui()
+        self.init_event()
 
     def init_ui(self):
         self.w_pg_signal.setBackground('#FFFFFF00')
         self.p_pg0.setMouseEnabled(x=False, y=False)
         self.p_pg1.setMouseEnabled(x=True, y=False)
-        self.p_pg1.setXRange(0, 50)
         self.p_pg0.setLabel('bottom', 'Time', 'sec')
         self.p_pg1.setLabel('bottom', 'Time', 'sec')
         self.p_pg0.showGrid(x=True, y=True, alpha=0.7)
         self.p_pg1.showGrid(x=True, y=True, alpha=0.7)
         self.p_pg0.addItem(self.pg_signal0)
         self.p_pg1.addItem(self.pg_signal1)
+        self.p_pg0.addItem(self.focus_region)
+        self.focus_region.setRegion([0, 10])  # focus regionの初期化
 
         # layout
         hbox0 = QW.QHBoxLayout()
         hbox0.addWidget(self.w_pg_signal)
         self.setLayout(hbox0)
+
+        # method
+        self.update_focus()
+
+    def init_event(self):
+        self.p_pg1.sigRangeChanged.connect(self.update_pg1_range)
+        self.focus_region.sigRegionChanged.connect(self.update_focus)
 
     def update_plot(self):
         self.pg_signal0.setData(self.x, self.y)
@@ -45,6 +55,15 @@ class WidgetSignal(QW.QWidget):
         signal = signal.astype('float16')
         self.y = signal
         self.update_plot()
+
+    def update_focus(self):
+        self.focus_region.setZValue(10)
+        minX, maxX = self.focus_region.getRegion()
+        self.p_pg1.setXRange(minX, maxX, padding=0)
+
+    def update_pg1_range(self, window, view_range):
+        rgn = view_range[0]
+        self.focus_region.setRegion(rgn)
 
 
 def main():

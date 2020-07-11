@@ -18,7 +18,8 @@ class ISedPyqt5(MainWindow):
         # region
         self.target_region_l = 0
         self.target_region_r = 2
-        self.target_region = pg.LinearRegionItem(brush='DAFF3750')
+        self.target_region0 = pg.LinearRegionItem(brush='DAFF3750')
+        self.target_region1 = pg.LinearRegionItem(brush='DAFF3750')
 
         # init method
         self.init_method()
@@ -28,7 +29,7 @@ class ISedPyqt5(MainWindow):
         pass
 
     def init_event(self):
-        self.target_region.sigRegionChanged.connect(self.update_target_region)
+        self.target_region0.sigRegionChanged.connect(self.update_target_region)
         self.btn_recommend.clicked.connect(self.first_recommend)
         self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
         self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
@@ -36,8 +37,8 @@ class ISedPyqt5(MainWindow):
         self.btn_plot.clicked.connect(self.show_first_region)
 
     def show_first_region(self):
-        self.w_signal.p_pg0.addItem(self.target_region)
-        # self.w_signal.p_pg1.addItem(self.target_region)
+        self.w_signal.p_pg0.addItem(self.target_region0)
+        self.w_signal.p_pg1.addItem(self.target_region1)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -64,8 +65,8 @@ class ISedPyqt5(MainWindow):
         self.btn_recommend.setEnabled(False)
 
         # 最初のターゲット領域を固定
-        self.w_signal.p_pg0.removeItem(self.target_region)
-        self.w_signal.p_pg1.removeItem(self.target_region)
+        self.w_signal.p_pg0.removeItem(self.target_region0)
+        self.w_signal.p_pg1.removeItem(self.target_region1)
         left, right = self.target_region_l, self.target_region_r
         fix_region = pg.LinearRegionItem(brush='AA000044', pen='AA0000AA')
         fix_region.setRegion([left, right])
