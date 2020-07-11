@@ -27,9 +27,11 @@ class WidgetRecommendList(QW.QWidget):
 
         # button
         self.btn_posi.setStyleSheet("background-color: blue; color: white")
+        self.btn_posi.setFixedWidth(100)
         self.btn_nega.setStyleSheet("background-color: red; color: white")
+        self.btn_nega.setFixedWidth(100)
         self.btn_find.setStyleSheet("background-color: orange; color: white")
-        self.btn_find.setSizePolicy(QW.QSizePolicy.Minimum,
+        self.btn_find.setSizePolicy(QW.QSizePolicy.Fixed,
                                     QW.QSizePolicy.Expanding)
 
         # layout
@@ -41,6 +43,7 @@ class WidgetRecommendList(QW.QWidget):
         hbox0.addWidget(self.list)
         hbox0.addLayout(vbox0)
         hbox0.addWidget(self.btn_find)
+        hbox0.addStretch()
         self.setLayout(hbox0)
 
 

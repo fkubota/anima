@@ -16,6 +16,8 @@ class WidgetSignal(QW.QWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.p_pg.setMouseEnabled(x=True, y=False)
+        self.p_pg.setXRange(5, 20, padding=0)
         self.w_pg_signal.setBackground('#FFFFFF00')
         self.p_pg.setLabel('bottom', 'Time', 'sec')
         self.p_pg.showGrid(x=True, y=True, alpha=0.7)

@@ -51,6 +51,10 @@ class MainWindow(QW.QMainWindow):
         self.signal, self.sr = librosa.load(path, sr=None)
         self.w_signal.set_signal(self.signal, self.sr)
 
+        # enable = False
+        self.btn_plot.setEnabled(False)
+        self.le_wav_path.setEnabled(False)
+
 
 def main():
     app = QW.QApplication(sys.argv)

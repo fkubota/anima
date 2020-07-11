@@ -18,21 +18,25 @@ class ISedPyqt5(MainWindow):
         # region
         self.target_region_l = 0
         self.target_region_r = 2
-        self.target_region = pg.LinearRegionItem(brush='DAFF3720')
+        self.target_region = pg.LinearRegionItem(brush='DAFF3750')
 
         # init method
         self.init_method()
         self.init_event()
 
     def init_method(self):
-        self.w_signal.p_pg.addItem(self.target_region)
+        pass
 
     def init_event(self):
         self.target_region.sigRegionChanged.connect(self.update_target_region)
-        self.btn_recommend.clicked.connect(self.recommend)
+        self.btn_recommend.clicked.connect(self.first_recommend)
         self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
         self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
         self.w_list.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
+        self.btn_plot.clicked.connect(self.show_first_region)
+
+    def show_first_region(self):
+        self.w_signal.p_pg.addItem(self.target_region)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -41,18 +45,29 @@ class ISedPyqt5(MainWindow):
         self.target_region_l = left
         self.target_region_r = right
 
-    def recommend(self):
-        print('\n--- recommend')
+    def first_recommend(self):
+        print('\n--- first_recommend')
         recommend_sec_list = self.get_recommend_sec()
         half_region = self.segment_length_sec/2
 
+        # recommend
         for i, rcmd_sec in enumerate(recommend_sec_list):
             region = WidgetRegion(brush='AAAAAA40', pen='00000077')
-            region.sigRegionChanged.connect(self.recommend_region_changed)
             region.set_id(i)
             region.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
             self.recommend_regions.append(region)
             self.w_signal.p_pg.addItem(region)
+
+        # recommend button を押せなくする
+        self.btn_recommend.setEnabled(False)
+
+        # 最初のターゲット領域を固定
+        self.w_signal.p_pg.removeItem(self.target_region)
+        left, right = self.target_region_l, self.target_region_r
+        fix_region = pg.LinearRegionItem(brush='AA000044', pen='AA0000AA')
+        fix_region.setRegion([left, right])
+        fix_region.setMovable(False)
+        self.w_signal.p_pg.addItem(fix_region)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')
@@ -131,16 +146,13 @@ class ISedPyqt5(MainWindow):
         scores = np.array(scores)
         return scores
 
-    def recommend_region_changed(self):
-        print(self.sender())
-
     def clicked_btn_find(self):
         '''
         findボタンがクリックされたら動く。
         1. レコメンドリージョン全てにクラスが割り振られているかチェック。 <--- 未実装
         2. クラスに応じて色を付けたリージョンを描画。
         3. リージョンを動かせないように固定。
-        4. レコメンドリージョンのクラスを初期化(Noneにする)。
+        4. レコメンドリージョンのクラスを初期化(None)にする。
         5. レコメンドリストを初期化。
         6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
         '''
