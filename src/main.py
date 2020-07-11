@@ -23,10 +23,10 @@ class ISedPyqt5(MainWindow):
         self.btn_recommend.clicked.connect(self.recommend)
 
         # init method
-        self.init_gui()
+        self.init_ui()
 
-    def init_gui(self):
-        self.w_signal.p_pg_signal.addItem(self.target_region)
+    def init_ui(self):
+        self.w_signal.p_pg.addItem(self.target_region)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -41,9 +41,9 @@ class ISedPyqt5(MainWindow):
         half_region = self.segment_length_sec/2
 
         for rcmd_sec in recommend_sec_list:
-            a = pg.LinearRegionItem(brush='AAAAAA20')
+            a = pg.LinearRegionItem(brush='AAAAAA40', pen='00000077')
             a.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
-            self.w_signal.p_pg_signal.addItem(a)
+            self.w_signal.p_pg.addItem(a)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')

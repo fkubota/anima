@@ -1,7 +1,7 @@
 import sys
 import librosa
 import PyQt5.QtWidgets as QW
-from widget_signal import SignalWidget
+from widget_signal import WidgetSignal
 
 ICON = './../data/icon_file/'
 
@@ -15,7 +15,7 @@ class MainWindow(QW.QMainWindow):
 
         # widget
         self.w0 = QW.QWidget()
-        self.w_signal = SignalWidget()
+        self.w_signal = WidgetSignal()
         self.le_wav_path = QW.QLineEdit()
         self.btn_plot = QW.QPushButton('plot')
         self.btn_recommend = QW.QPushButton('recommend')
@@ -25,9 +25,11 @@ class MainWindow(QW.QMainWindow):
         # self.btn_calc.clicked.connect(self.hoge)
 
         # init method
-        self.init_widget()
+        self.init_ui()
 
-    def init_widget(self):
+    def init_ui(self):
+        self.resize(1400, 300)
+
         # layout
         self.setCentralWidget(self.w0)
         hbox0 = QW.QHBoxLayout()
