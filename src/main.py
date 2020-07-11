@@ -36,7 +36,8 @@ class ISedPyqt5(MainWindow):
         self.btn_plot.clicked.connect(self.show_first_region)
 
     def show_first_region(self):
-        self.w_signal.p_pg.addItem(self.target_region)
+        self.w_signal.p_pg0.addItem(self.target_region)
+        # self.w_signal.p_pg1.addItem(self.target_region)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -56,18 +57,21 @@ class ISedPyqt5(MainWindow):
             region.set_id(i)
             region.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
             self.recommend_regions.append(region)
-            self.w_signal.p_pg.addItem(region)
+            self.w_signal.p_pg0.addItem(region)
+            self.w_signal.p_pg1.addItem(region)
 
         # recommend button を押せなくする
         self.btn_recommend.setEnabled(False)
 
         # 最初のターゲット領域を固定
-        self.w_signal.p_pg.removeItem(self.target_region)
+        self.w_signal.p_pg0.removeItem(self.target_region)
+        self.w_signal.p_pg1.removeItem(self.target_region)
         left, right = self.target_region_l, self.target_region_r
         fix_region = pg.LinearRegionItem(brush='AA000044', pen='AA0000AA')
         fix_region.setRegion([left, right])
         fix_region.setMovable(False)
-        self.w_signal.p_pg.addItem(fix_region)
+        self.w_signal.p_pg0.addItem(fix_region)
+        self.w_signal.p_pg1.addItem(fix_region)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')
@@ -164,7 +168,8 @@ class ISedPyqt5(MainWindow):
             fix_region = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
             fix_region.setRegion([left, right])
             fix_region.setMovable(False)
-            self.w_signal.p_pg.addItem(fix_region)
+            self.w_signal.p_pg0.addItem(fix_region)
+            self.w_signal.p_pg1.addItem(fix_region)
 
     def clicked_btn_posi_nega(self):
         '''

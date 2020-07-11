@@ -29,7 +29,7 @@ class MainWindow(QW.QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.resize(1400, 400)
+        self.resize(1400, 600)
 
         # layout
         self.setCentralWidget(self.w0)

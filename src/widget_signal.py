@@ -10,18 +10,24 @@ class WidgetSignal(QW.QWidget):
         super(WidgetSignal, self).__init__(parent)
         # widget
         self.w_pg_signal = pg.GraphicsWindow()
-        self.p_pg = self.w_pg_signal.addPlot()
-        self.pg_signal = self.p_pg.plot(pen=('#0F8EBB50'))
+        self.p_pg0 = self.w_pg_signal.addPlot(row=1, col=0)
+        self.p_pg1 = self.w_pg_signal.addPlot(row=2, col=0)
+        self.pg_signal0 = self.p_pg0.plot(pen=('#0F8EBB50'))
+        self.pg_signal1 = self.p_pg1.plot(pen=('#0F8EBB50'))
 
         self.init_ui()
 
     def init_ui(self):
-        self.p_pg.setMouseEnabled(x=True, y=False)
-        self.p_pg.setXRange(5, 20, padding=0)
         self.w_pg_signal.setBackground('#FFFFFF00')
-        self.p_pg.setLabel('bottom', 'Time', 'sec')
-        self.p_pg.showGrid(x=True, y=True, alpha=0.7)
-        self.p_pg.addItem(self.pg_signal)
+        self.p_pg0.setMouseEnabled(x=False, y=False)
+        self.p_pg1.setMouseEnabled(x=True, y=False)
+        self.p_pg1.setXRange(0, 50)
+        self.p_pg0.setLabel('bottom', 'Time', 'sec')
+        self.p_pg1.setLabel('bottom', 'Time', 'sec')
+        self.p_pg0.showGrid(x=True, y=True, alpha=0.7)
+        self.p_pg1.showGrid(x=True, y=True, alpha=0.7)
+        self.p_pg0.addItem(self.pg_signal0)
+        self.p_pg1.addItem(self.pg_signal1)
 
         # layout
         hbox0 = QW.QHBoxLayout()
@@ -29,7 +35,8 @@ class WidgetSignal(QW.QWidget):
         self.setLayout(hbox0)
 
     def update_plot(self):
-        self.pg_signal.setData(self.x, self.y)
+        self.pg_signal0.setData(self.x, self.y)
+        self.pg_signal1.setData(self.x, self.y)
 
     def set_signal(self, signal, sr):
         self.x = np.arange(0, len(signal))/sr

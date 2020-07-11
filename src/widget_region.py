@@ -25,12 +25,12 @@ def main():
     data, sr = librosa.load(filename, sr=None)
     x = np.arange(0, len(data))/sr
     w_pg_signal = pg.GraphicsWindow()
-    p_pg = w_pg_signal.addPlot()
-    pg_signal = p_pg.plot()
-    pg_signal.setData(x, data)
+    p_pg0 = w_pg_signal.addPlot()
+    pg_signal0 = p_pg0.plot()
+    pg_signal0.setData(x, data)
     r = WidgetRegion('test')
     r.setBrush('88000088')
-    p_pg.addItem(r)
+    p_pg0.addItem(r)
 
     w_pg_signal.show()
     sys.exit(app.exec_())
