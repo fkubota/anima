@@ -28,6 +28,8 @@ class WidgetRecommendList(QW.QWidget):
         self.btn_posi.setStyleSheet("background-color: blue; color: white")
         self.btn_nega.setStyleSheet("background-color: red; color: white")
         self.btn_find.setStyleSheet("background-color: orange; color: white")
+        self.btn_find.setSizePolicy(QW.QSizePolicy.Minimum,
+                                    QW.QSizePolicy.Expanding)
         self.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
         self.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
 
@@ -44,10 +46,13 @@ class WidgetRecommendList(QW.QWidget):
 
     def clicked_btn_posi_nega(self):
         sender = self.sender()
+        row = self.list.currentRow()
         if sender == self.btn_posi:
-            print('posi')
+            text = f'Region #{row} ---> Positive'
+            self.list.item(row).setText(text)
         elif sender == self.btn_nega:
-            print('nega')
+            text = f'Region #{row} ---> Negative'
+            self.list.item(row).setText(text)
 
 
 def main():
