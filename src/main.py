@@ -4,6 +4,7 @@ import librosa
 import PyQt5.QtWidgets as QW
 import pyqtgraph as pg
 from widget_main import MainWindow
+from widget_region import WidgetRegion
 
 
 class ISedPyqt5(MainWindow):
@@ -12,21 +13,26 @@ class ISedPyqt5(MainWindow):
 
         self.x_sec = 0
         self.segment_length_sec = 1
+        self.recommend_regions = []
 
         # region
         self.target_region_l = 0
         self.target_region_r = 2
         self.target_region = pg.LinearRegionItem(brush='DAFF3720')
 
-        # event
+        # init method
+        self.init_method()
+        self.init_event()
+
+    def init_method(self):
+        self.w_signal.p_pg.addItem(self.target_region)
+
+    def init_event(self):
         self.target_region.sigRegionChanged.connect(self.update_target_region)
         self.btn_recommend.clicked.connect(self.recommend)
-
-        # init method
-        self.init_ui()
-
-    def init_ui(self):
-        self.w_signal.p_pg.addItem(self.target_region)
+        self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
+        self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
+        self.w_list.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -40,10 +46,13 @@ class ISedPyqt5(MainWindow):
         recommend_sec_list = self.get_recommend_sec()
         half_region = self.segment_length_sec/2
 
-        for rcmd_sec in recommend_sec_list:
-            a = pg.LinearRegionItem(brush='AAAAAA40', pen='00000077')
-            a.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
-            self.w_signal.p_pg.addItem(a)
+        for i, rcmd_sec in enumerate(recommend_sec_list):
+            region = WidgetRegion(brush='AAAAAA40', pen='00000077')
+            region.sigRegionChanged.connect(self.recommend_region_changed)
+            region.set_id(i)
+            region.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
+            self.recommend_regions.append(region)
+            self.w_signal.p_pg.addItem(region)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')
@@ -122,11 +131,50 @@ class ISedPyqt5(MainWindow):
         scores = np.array(scores)
         return scores
 
+    def recommend_region_changed(self):
+        print(self.sender())
+
+    def clicked_btn_find(self):
+        '''
+        findボタンがクリックされたら動く。
+        1. レコメンドリージョン全てにクラスが割り振られているかチェック。 <--- 未実装
+        2. クラスに応じて色を付けたリージョンを描画。
+        3. リージョンを動かせないように固定。
+        4. レコメンドリージョンのクラスを初期化(Noneにする)。
+        5. レコメンドリストを初期化。
+        6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
+        '''
+        for i_region, region in enumerate(self.recommend_regions):
+            class_ = region.class_
+            color_brush = 'AA000044' if class_ == 'Positive' else '0000AA44'
+            color_pen = 'AA0000AA' if class_ == 'Positive' else '0000AAAA'
+            left, right = region.getRegion()
+            fix_region = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
+            fix_region.setRegion([left, right])
+            fix_region.setMovable(False)
+            self.w_signal.p_pg.addItem(fix_region)
+
+    def clicked_btn_posi_nega(self):
+        '''
+        Positive/Negative ボタンがクリックされたら、リージョンとリストのクラスを更新
+        '''
+        sender = self.sender()
+        row = self.w_list.list.currentRow()
+        if sender.text() == 'Positive':
+            text = 'Positive'
+        elif sender.text() == 'Negative':
+            text = 'Negative'
+
+        self.recommend_regions[row].set_class(text)
+        btn_text = f'Region #{row} ---> {text}'
+        self.w_list.list.item(row).setText(btn_text)
+
 
 def main():
     app = QW.QApplication(sys.argv)
 
     w = ISedPyqt5()
+    w.move(300, 500)
     filename = librosa.util.example_audio_file()
     w.le_wav_path.setText(filename)
     w.show()

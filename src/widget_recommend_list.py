@@ -18,6 +18,7 @@ class WidgetRecommendList(QW.QWidget):
         self.setFixedHeight(120)
 
         # list
+        self.list.setFixedWidth(200)
         self.list.insertItem(0, 'Region #0')
         self.list.insertItem(1, 'Region #1')
         self.list.insertItem(2, 'Region #2')
@@ -30,8 +31,6 @@ class WidgetRecommendList(QW.QWidget):
         self.btn_find.setStyleSheet("background-color: orange; color: white")
         self.btn_find.setSizePolicy(QW.QSizePolicy.Minimum,
                                     QW.QSizePolicy.Expanding)
-        self.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
-        self.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
 
         # layout
         vbox0 = QW.QVBoxLayout()
@@ -43,16 +42,6 @@ class WidgetRecommendList(QW.QWidget):
         hbox0.addLayout(vbox0)
         hbox0.addWidget(self.btn_find)
         self.setLayout(hbox0)
-
-    def clicked_btn_posi_nega(self):
-        sender = self.sender()
-        row = self.list.currentRow()
-        if sender == self.btn_posi:
-            text = f'Region #{row} ---> Positive'
-            self.list.item(row).setText(text)
-        elif sender == self.btn_nega:
-            text = f'Region #{row} ---> Negative'
-            self.list.item(row).setText(text)
 
 
 def main():

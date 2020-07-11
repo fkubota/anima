@@ -6,9 +6,16 @@ import PyQt5.QtWidgets as QW
 
 
 class WidgetRegion(pg.LinearRegionItem):
-    def __init__(self, name):
-        super(WidgetRegion, self).__init__()
-        self.name = name
+    def __init__(self, brush, pen):
+        super(WidgetRegion, self).__init__(brush=brush, pen=brush)
+        self.id = None
+        self.class_ = None
+
+    def set_id(self, id_):
+        self.id = id_
+
+    def set_class(self, class_):
+        self.class_ = class_
 
 
 def main():
