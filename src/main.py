@@ -13,15 +13,16 @@ class ISedPyqt5(MainWindow):
 
         self.x_sec = 0
         self.segment_length_sec = 1
-        self.recommend_regions0 = []
-        self.recommend_regions1 = []
+        self.recommend_regions = []
 
         # region
         self.target_region_l = 0
         self.target_region_r = 2
-        self.target_region0 = pg.LinearRegionItem(
-                                brush='AA000044', pen='AA000044')
-        self.target_region1 = pg.LinearRegionItem(
+        # self.target_region0 = pg.LinearRegionItem(
+        #                         brush='AA000044', pen='AA000044')
+        # self.target_region1 = pg.LinearRegionItem(
+        #                         brush='AA000044', pen='AA000044')
+        self.target_region_pair = WidgetRegionPair(
                                 brush='AA000044', pen='AA000044')
 
         # bar
@@ -40,17 +41,20 @@ class ISedPyqt5(MainWindow):
         self.w_signal.p_pg1.addItem(self.bar_1)
 
     def init_event(self):
-        self.target_region0.sigRegionChanged.connect(self.update_target_region)
+        self.target_region_pair.region0.sigRegionChanged.connect(self.update_target_region)
+        self.target_region_pair.region1.sigRegionChanged.connect(self.update_target_region)
         self.btn_recommend.clicked.connect(self.first_recommend)
         self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
         self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
         self.w_list.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
         self.btn_open.clicked.connect(self.show_first_region)
         self.w_mp.player.positionChanged.connect(self.player_position_changed)
+        self.bar_0.sigPositionChanged.connect(self.update_bar_pos)
+        self.bar_1.sigPositionChanged.connect(self.update_bar_pos)
 
     def show_first_region(self):
-        self.w_signal.p_pg0.addItem(self.target_region0)
-        self.w_signal.p_pg1.addItem(self.target_region1)
+        self.w_signal.p_pg0.addItem(self.target_region_pair.region0)
+        self.w_signal.p_pg1.addItem(self.target_region_pair.region1)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -68,23 +72,20 @@ class ISedPyqt5(MainWindow):
         for i, rcmd_sec in enumerate(recommend_sec_list):
             region = WidgetRegionPair(brush='AAAAAA40', pen='00000077')
             region.set_id(i)
-            region.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
-            self.recommend_regions0.append(region)
-            self.w_signal.p_pg0.addItem(region)
-            # self.w_signal.p_pg1.addItem(region)
+            region.region0.setRegion(
+                            [rcmd_sec-half_region, rcmd_sec+half_region])
+            region.region1.setRegion(
+                            [rcmd_sec-half_region, rcmd_sec+half_region])
+            self.w_signal.p_pg0.addItem(region.region0)
+            self.w_signal.p_pg1.addItem(region.region1)
+            self.recommend_regions.append(region)
 
         # recommend button を押せなくする
         self.btn_recommend.setEnabled(False)
 
-        # 最初のターゲット領域を固定
-        self.w_signal.p_pg0.removeItem(self.target_region0)
-        self.w_signal.p_pg1.removeItem(self.target_region1)
-        left, right = self.target_region_l, self.target_region_r
-        fix_region = pg.LinearRegionItem(brush='AA000044', pen='AA0000AA')
-        fix_region.setRegion([left, right])
-        fix_region.setMovable(False)
-        self.w_signal.p_pg0.addItem(fix_region)
-        self.w_signal.p_pg1.addItem(fix_region)
+        # # 最初のターゲット領域を固定
+        self.target_region_pair.region0.setMovable(False)
+        self.target_region_pair.region1.setMovable(False)
 
     def get_recommend_sec(self):
         print('\n--- get_recommend_regions')
@@ -173,7 +174,7 @@ class ISedPyqt5(MainWindow):
         5. レコメンドリストを初期化。
         6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
         '''
-        for i_region, region in enumerate(self.recommend_regions0):
+        for i_region, region in enumerate(self.recommend_regions):
             class_ = region.class_
             color_brush = 'AA000044' if class_ == 'Positive' else '0000AA44'
             color_pen = 'AA0000AA' if class_ == 'Positive' else '0000AAAA'
@@ -195,7 +196,7 @@ class ISedPyqt5(MainWindow):
         elif sender.text() == 'Negative':
             text = 'Negative'
 
-        self.recommend_regions0[row].set_class(text)
+        self.recommend_regions[row].set_class(text)
         btn_text = f'Region #{row} ---> {text}'
         self.w_list.list.item(row).setText(btn_text)
 
@@ -207,6 +208,14 @@ class ISedPyqt5(MainWindow):
         # self.pg_bar.setPos(posi_sec)
         self.bar_0.setPos(pos_sec)
         self.bar_1.setPos(pos_sec)
+
+    def update_bar_pos(self):
+        sender = self.sender()
+        pos = sender.getPos()[0]
+        if sender == self.bar_0:
+            self.bar_1.setPos(pos)
+        elif sender == self.bar_1:
+            self.bar_0.setPos(pos)
 
 
 def main():

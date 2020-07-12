@@ -32,9 +32,10 @@ class WidgetRegionPair(QW.QWidget):
     def update_pos(self):
         sender = self.sender()
         left, right = sender.getRegion()
-
-        self.region0.setRegion([left, right])
-        self.region1.setRegion([left, right])
+        if sender == self.region0:
+            self.region1.setRegion([left, right])
+        elif sender == self.region1:
+            self.region0.setRegion([left, right])
 
 
 def main():
