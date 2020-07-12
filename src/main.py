@@ -41,8 +41,10 @@ class ISedPyqt5(MainWindow):
         self.w_signal.p_pg1.addItem(self.bar_1)
 
     def init_event(self):
-        self.target_region_pair.region0.sigRegionChanged.connect(self.update_target_region)
-        self.target_region_pair.region1.sigRegionChanged.connect(self.update_target_region)
+        self.target_region_pair.region0.sigRegionChanged.connect(
+                                                    self.update_target_region)
+        self.target_region_pair.region1.sigRegionChanged.connect(
+                                                    self.update_target_region)
         self.btn_recommend.clicked.connect(self.first_recommend)
         self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
         self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
@@ -205,17 +207,20 @@ class ISedPyqt5(MainWindow):
         music player の時間に変更があったら動く関数
         '''
         pos_sec = pos/1000
-        # self.pg_bar.setPos(posi_sec)
         self.bar_0.setPos(pos_sec)
         self.bar_1.setPos(pos_sec)
 
     def update_bar_pos(self):
         sender = self.sender()
         pos = sender.getPos()[0]
+        # bar を連動させる
         if sender == self.bar_0:
             self.bar_1.setPos(pos)
         elif sender == self.bar_1:
             self.bar_0.setPos(pos)
+
+        # musicplayerの再生位置の調整
+        self.w_mp.player.setPosition(pos*1000)  # ms 単位で渡す
 
 
 def main():
