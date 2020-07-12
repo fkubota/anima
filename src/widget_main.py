@@ -1,5 +1,5 @@
 import sys
-import librosa
+# import librosa
 import PyQt5.QtWidgets as QW
 from widget_signal import WidgetSignal
 from widget_recommend_list import WidgetRecommendList
@@ -18,24 +18,25 @@ class MainWindow(QW.QMainWindow):
         self.w0 = QW.QWidget()
         self.w_signal = WidgetSignal()
         self.w_list = WidgetRecommendList()
-        self.le_wav_path = QW.QLineEdit()
-        self.btn_plot = QW.QPushButton('plot')
+        self.lbl_file = QW.QLabel('No File Chosen')
+        self.btn_open = QW.QPushButton('Open')
         self.btn_recommend = QW.QPushButton('recommend')
 
         # event
-        self.btn_plot.clicked.connect(self.clicked_btn_plot)
+        self.btn_open.clicked.connect(self.clicked_btn_open)
 
         # init method
         self.init_ui()
 
     def init_ui(self):
         self.resize(1400, 600)
+        self.btn_open.setFixedWidth(100)
 
         # layout
         self.setCentralWidget(self.w0)
         hbox0 = QW.QHBoxLayout()
-        hbox0.addWidget(self.btn_plot)
-        hbox0.addWidget(self.le_wav_path)
+        hbox0.addWidget(self.btn_open)
+        hbox0.addWidget(self.lbl_file)
         vbox0 = QW.QVBoxLayout()
         vbox0.addLayout(hbox0)
         vbox0.addWidget(self.w_signal)
@@ -43,17 +44,19 @@ class MainWindow(QW.QMainWindow):
         vbox0.addWidget(self.w_list)
         self.w0.setLayout(vbox0)
 
-    def clicked_btn_plot(self):
+    def clicked_btn_open(self):
         '''
-        textboxに入力されているパスの音声ファイルをロードし、プロット
+        ファイルダイアログからファイルを取得
         '''
-        path = self.le_wav_path.text()
-        self.signal, self.sr = librosa.load(path, sr=None)
-        self.w_signal.set_signal(self.signal, self.sr)
+        filename, _ = QW.QFileDialog.getOpenFileName(
+                        self,
+                        'Open Music File',
+                        filter="Audio Files (*.wav *.mp3 *.ogg)"
+                        )
+        self.lbl_file.setText(filename)
 
         # enable = False
-        self.btn_plot.setEnabled(False)
-        self.le_wav_path.setEnabled(False)
+        self.btn_open.setEnabled(False)
 
 
 def main():
@@ -61,8 +64,8 @@ def main():
 
     w = MainWindow()
     w.move(300, 500)
-    filename = librosa.util.example_audio_file()
-    w.le_wav_path.setText(filename)
+    # filename = librosa.util.example_audio_file()
+    # w.lbl_file.setText(filename)
 
     w.show()
     sys.exit(app.exec_())
