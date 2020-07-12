@@ -4,7 +4,7 @@ import librosa
 import PyQt5.QtWidgets as QW
 import pyqtgraph as pg
 from widget_main import MainWindow
-from widget_region import WidgetRegion
+from widget_region_pair import WidgetRegionPair
 
 
 class ISedPyqt5(MainWindow):
@@ -13,20 +13,31 @@ class ISedPyqt5(MainWindow):
 
         self.x_sec = 0
         self.segment_length_sec = 1
-        self.recommend_regions = []
+        self.recommend_regions0 = []
+        self.recommend_regions1 = []
 
         # region
         self.target_region_l = 0
         self.target_region_r = 2
-        self.target_region0 = pg.LinearRegionItem(brush='DAFF3750')
-        self.target_region1 = pg.LinearRegionItem(brush='DAFF3750')
+        self.target_region0 = pg.LinearRegionItem(
+                                brush='AA000044', pen='AA000044')
+        self.target_region1 = pg.LinearRegionItem(
+                                brush='AA000044', pen='AA000044')
+
+        # bar
+        self.bar_0 = pg.InfiniteLine(
+                            pen='000000', hoverPen='FF000055', movable=True)
+        self.bar_1 = pg.InfiniteLine(
+                            pen='000000', hoverPen='FF000055', movable=True)
 
         # init method
         self.init_method()
         self.init_event()
 
     def init_method(self):
-        pass
+        self.w_mp.player.setNotifyInterval(100)
+        self.w_signal.p_pg0.addItem(self.bar_0)
+        self.w_signal.p_pg1.addItem(self.bar_1)
 
     def init_event(self):
         self.target_region0.sigRegionChanged.connect(self.update_target_region)
@@ -34,7 +45,8 @@ class ISedPyqt5(MainWindow):
         self.w_list.btn_find.clicked.connect(self.clicked_btn_find)
         self.w_list.btn_posi.clicked.connect(self.clicked_btn_posi_nega)
         self.w_list.btn_nega.clicked.connect(self.clicked_btn_posi_nega)
-        self.btn_plot.clicked.connect(self.show_first_region)
+        self.btn_open.clicked.connect(self.show_first_region)
+        self.w_mp.player.positionChanged.connect(self.player_position_changed)
 
     def show_first_region(self):
         self.w_signal.p_pg0.addItem(self.target_region0)
@@ -54,12 +66,12 @@ class ISedPyqt5(MainWindow):
 
         # recommend
         for i, rcmd_sec in enumerate(recommend_sec_list):
-            region = WidgetRegion(brush='AAAAAA40', pen='00000077')
+            region = WidgetRegionPair(brush='AAAAAA40', pen='00000077')
             region.set_id(i)
             region.setRegion([rcmd_sec-half_region, rcmd_sec+half_region])
-            self.recommend_regions.append(region)
+            self.recommend_regions0.append(region)
             self.w_signal.p_pg0.addItem(region)
-            self.w_signal.p_pg1.addItem(region)
+            # self.w_signal.p_pg1.addItem(region)
 
         # recommend button を押せなくする
         self.btn_recommend.setEnabled(False)
@@ -161,7 +173,7 @@ class ISedPyqt5(MainWindow):
         5. レコメンドリストを初期化。
         6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
         '''
-        for i_region, region in enumerate(self.recommend_regions):
+        for i_region, region in enumerate(self.recommend_regions0):
             class_ = region.class_
             color_brush = 'AA000044' if class_ == 'Positive' else '0000AA44'
             color_pen = 'AA0000AA' if class_ == 'Positive' else '0000AAAA'
@@ -183,9 +195,18 @@ class ISedPyqt5(MainWindow):
         elif sender.text() == 'Negative':
             text = 'Negative'
 
-        self.recommend_regions[row].set_class(text)
+        self.recommend_regions0[row].set_class(text)
         btn_text = f'Region #{row} ---> {text}'
         self.w_list.list.item(row).setText(btn_text)
+
+    def player_position_changed(self, pos, senderType=False):
+        '''
+        music player の時間に変更があったら動く関数
+        '''
+        pos_sec = pos/1000
+        # self.pg_bar.setPos(posi_sec)
+        self.bar_0.setPos(pos_sec)
+        self.bar_1.setPos(pos_sec)
 
 
 def main():
@@ -193,8 +214,6 @@ def main():
 
     w = ISedPyqt5()
     w.move(300, 500)
-    filename = librosa.util.example_audio_file()
-    w.le_wav_path.setText(filename)
     w.show()
     sys.exit(app.exec_())
 

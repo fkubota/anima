@@ -14,7 +14,7 @@ class WidgetSignal(QW.QWidget):
         self.p_pg1 = self.w_pg_signal.addPlot(row=2, col=0)
         self.pg_signal0 = self.p_pg0.plot(pen=('#0F8EBB50'))
         self.pg_signal1 = self.p_pg1.plot(pen=('#0F8EBB50'))
-        self.focus_region = pg.LinearRegionItem(brush='FAB62A05', pen=None)
+        self.focus_region = pg.LinearRegionItem(brush='F0EB5750', pen=None)
 
         self.init_ui()
         self.init_event()
@@ -57,7 +57,7 @@ class WidgetSignal(QW.QWidget):
         self.update_plot()
 
     def update_focus(self):
-        self.focus_region.setZValue(10)
+        # self.focus_region.setZValue(10)
         minX, maxX = self.focus_region.getRegion()
         self.p_pg1.setXRange(minX, maxX, padding=0)
 

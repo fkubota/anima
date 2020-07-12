@@ -18,10 +18,14 @@ class WidgetMusicPlayer(QW.QWidget):
         self.init_event()
 
     def init_ui(self):
+        self.btn_play.setFixedWidth(100)
+        self.btn_pause.setFixedWidth(100)
+
         # layout
         hbox0 = QW.QHBoxLayout()
         hbox0.addWidget(self.btn_play)
         hbox0.addWidget(self.btn_pause)
+        hbox0.addStretch()
         self.setLayout(hbox0)
 
     def init_event(self):

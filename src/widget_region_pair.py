@@ -5,9 +5,12 @@ import pyqtgraph as pg
 import PyQt5.QtWidgets as QW
 
 
-class WidgetRegion(pg.LinearRegionItem):
+class WidgetRegionPair(pg.LinearRegionItem):
+    '''
+    一方が動けば、もう一方も動くようにする
+    '''
     def __init__(self, brush, pen):
-        super(WidgetRegion, self).__init__(brush=brush, pen=brush)
+        super(WidgetRegionPair, self).__init__(brush=brush, pen=brush)
         self.id = None
         self.class_ = None
 
@@ -28,8 +31,7 @@ def main():
     p_pg0 = w_pg_signal.addPlot()
     pg_signal0 = p_pg0.plot()
     pg_signal0.setData(x, data)
-    r = WidgetRegion('test')
-    r.setBrush('88000088')
+    r = WidgetRegionPair(brush='AA0000', pen='AA0000')
     p_pg0.addItem(r)
 
     w_pg_signal.show()

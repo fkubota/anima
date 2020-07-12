@@ -1,8 +1,9 @@
 import sys
-# import librosa
+import librosa
 import PyQt5.QtWidgets as QW
 from widget_signal import WidgetSignal
 from widget_recommend_list import WidgetRecommendList
+from widget_music_player import WidgetMusicPlayer
 
 ICON = './../data/icon_file/'
 
@@ -18,6 +19,7 @@ class MainWindow(QW.QMainWindow):
         self.w0 = QW.QWidget()
         self.w_signal = WidgetSignal()
         self.w_list = WidgetRecommendList()
+        self.w_mp = WidgetMusicPlayer()
         self.lbl_file = QW.QLabel('No File Chosen')
         self.btn_open = QW.QPushButton('Open')
         self.btn_recommend = QW.QPushButton('recommend')
@@ -41,6 +43,7 @@ class MainWindow(QW.QMainWindow):
         vbox0.addLayout(hbox0)
         vbox0.addWidget(self.w_signal)
         vbox0.addWidget(self.btn_recommend)
+        vbox0.addWidget(self.w_mp)
         vbox0.addWidget(self.w_list)
         self.w0.setLayout(vbox0)
 
@@ -54,6 +57,15 @@ class MainWindow(QW.QMainWindow):
                         filter="Audio Files (*.wav *.mp3 *.ogg)"
                         )
         self.lbl_file.setText(filename)
+
+        # file load
+        signal, sr = librosa.load(filename, sr=None)
+        self.signal = signal
+        self.sr = sr
+        self.w_signal.set_signal(signal, sr)
+
+        # set music player
+        self.w_mp.set_contents(filename)
 
         # enable = False
         self.btn_open.setEnabled(False)
