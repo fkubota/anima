@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import pygame
 import librosa
 import PyQt5.QtWidgets as QW
 import pyqtgraph as pg
