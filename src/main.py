@@ -180,12 +180,15 @@ class ISedPyqt5(MainWindow):
             class_ = region.class_
             color_brush = 'AA000044' if class_ == 'Positive' else '0000AA44'
             color_pen = 'AA0000AA' if class_ == 'Positive' else '0000AAAA'
-            left, right = region.getRegion()
-            fix_region = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
-            fix_region.setRegion([left, right])
-            fix_region.setMovable(False)
-            self.w_signal.p_pg0.addItem(fix_region)
-            self.w_signal.p_pg1.addItem(fix_region)
+            left, right = region.region0.getRegion()
+            fix_region0 = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
+            fix_region0.setRegion([left, right])
+            fix_region0.setMovable(False)
+            fix_region1 = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
+            fix_region1.setRegion([left, right])
+            fix_region1.setMovable(False)
+            self.w_signal.p_pg0.addItem(fix_region0)
+            self.w_signal.p_pg1.addItem(fix_region1)
 
     def clicked_btn_posi_nega(self):
         '''
