@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 class DFHandler:
     def __init__(self, signal, sr):
         self.df_seg = pd.DataFrame()
+        self.df_rel = pd.DataFrame()
         self.signal = signal
         self.sr = sr
         self.seg_length_sec = 0
@@ -124,8 +125,10 @@ class DFHandler:
 
             # drop
             self.df_seg = self.df_seg.drop(index=idx)
+
         self.df_seg = pd.concat(
                         [self.df_seg, df_feats]).sort_values('seg_start_sec')
+        self.df_seg = self.df_seg.reset_index(drop=True)
 
     def feature_extraction(self, signal):
         n_fft = int(self.sr/10)
@@ -138,6 +141,70 @@ class DFHandler:
                                 hop_length=hop_length)
         feats = pd.DataFrame(feats.T).mean(axis=0).values
         return feats
+
+    def calc_df_rel(self):
+        '''
+        df_seg から、df_relを計算
+        df_relのcolumns: ['seg_start_sec', 'label', 'relevance']
+        '''
+        relevances = []
+        # seg_starts_sec = []
+        for idx in range(len(self.df_seg)):
+            # 自分とその他のデータフレームに分ける
+            df_me = self.df_seg.iloc[[idx], :]
+            df_other = self.df_seg.drop(index=idx)
+            labels = df_other['label'].values
+
+            # labelがNone以外なら計算しない
+            if df_me.label.values != 'None':
+                relevances.append(0)
+                continue
+
+            # posi, nega だけ取り出す
+            idxs = (labels == 'Negative') | (labels == 'Positive')
+            df_other = df_other[idxs]
+
+            # 距離を計算
+            feat_me = df_me.drop(['seg_start_sec', 'label'], axis=1).values
+            feat_other = df_other.drop(
+                            ['seg_start_sec', 'label'], axis=1).values
+            dist = np.linalg.norm(feat_other - feat_me, axis=1)
+
+            # 距離とラベルの結合
+            df_label_dist = pd.DataFrame()
+            df_label_dist['label'] = df_other['label'].values
+            df_label_dist['dist'] = dist
+
+            idxs = df_label_dist['label'] == 'Positive'
+            dist_posi = df_label_dist[idxs]['dist'].values
+            min_idx = np.argsort(dist_posi)[0]
+            min_dist_posi = dist_posi[min_idx]
+
+            idxs = df_label_dist['label'] == 'Negative'
+            dist_nega = df_label_dist[idxs]['dist'].values
+            min_idx = np.argsort(dist_nega)[0]
+            min_dist_nega = dist_nega[min_idx]
+
+            rel = min_dist_nega/(min_dist_nega + min_dist_posi)
+        #     seg_starts_sec.append(seg_start_sec)
+            relevances.append(rel)
+
+        self.df_rel = pd.DataFrame()
+        self.df_rel['seg_start_sec'] = self.df_seg['seg_start_sec'].values
+        self.df_rel['label'] = self.df_seg['label'].values
+        self.df_rel['relevance'] = relevances
+
+    def recommend_regions(self):
+        self.calc_df_rel()
+        top5_idxs = np.argsort(self.df_rel['relevance'].values)[::-1][:5]
+        recommend_regions = []
+        for idx in top5_idxs:
+            st_idx = idx
+            ed_idx = idx + 1
+            st_sec = self.df_rel['seg_start_sec'].values[st_idx]
+            ed_sec = self.df_rel['seg_start_sec'].values[ed_idx]
+            recommend_regions.append([st_sec, ed_sec])
+        return recommend_regions
 
 
 def main():
@@ -155,9 +222,11 @@ def main():
     print(df_handler.df_seg.head(10))
 
     df_handler.update_df_seg(5.2, 6.0, 'Positive')
-    print('----------------======================*************2')
+    print('----------------======================*************3')
     print(df_handler.df_seg.head(10))
 
+    print('----------------======================*************4')
+    print(df_handler.recommend_regions())
 
 
 if __name__ == '__main__':
