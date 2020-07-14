@@ -44,7 +44,7 @@ class DFHandler:
 
             # feats
             time = np.arange(0, len(self.signal))/self.sr
-            idxs = (seg_start_sec <= time) & (time < seg_end_sec)
+            idxs = (seg_start_sec <= time) & (time <= seg_end_sec)
             feats = self.feature_extraction(self.signal[idxs])
             # feats = pd.DataFrame(feats.T).mean(axis=0).values
             _df_feats = pd.DataFrame([feats], columns=self.feat_names)
@@ -62,11 +62,12 @@ class DFHandler:
         また、領域の前後のセグメントの特徴量も再計算しないといけないことに注意
         '''
         _start_sec = start_sec - 10**(-2)
-        label_other = 'Negative' if label == 'Positive' else 'Positive'
+        # label_other = 'Negative' if label == 'Positive' else 'Positive'
+        label_other = 'Negative'
 
         # 領域に入ってるセグメントを削除
         seg_starts_sec = self.df_seg['seg_start_sec'].values
-        idxs = (_start_sec <= seg_starts_sec) & (seg_starts_sec < end_sec)
+        idxs = (_start_sec <= seg_starts_sec) & (seg_starts_sec <= end_sec)
         self.df_seg = self.df_seg[np.logical_not(idxs)]
 
         # 新しいラベル付きセグメントを付与
@@ -114,7 +115,7 @@ class DFHandler:
             # signal
             time = np.arange(0, len(self.signal))/self.sr
             _start_sec = start_sec - 10**(-2)
-            idxs = (start_sec <= time) & (time < end_sec)
+            idxs = (start_sec <= time) & (time <= end_sec)
             feats = self.feature_extraction(self.signal[idxs])
             feats = self.scaler.transform([feats]).T[:, 0]
             _df_feats = pd.DataFrame([feats], columns=self.feat_names)
@@ -198,7 +199,7 @@ class DFHandler:
         self.calc_df_rel()
         top5_idxs = np.argsort(self.df_rel['relevance'].values)[::-1][:5]
         recommend_regions = []
-        for idx in top5_idxs:
+        for idx in sorted(top5_idxs):
             st_idx = idx
             ed_idx = idx + 1
             st_sec = self.df_rel['seg_start_sec'].values[st_idx]

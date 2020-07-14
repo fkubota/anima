@@ -5,6 +5,7 @@ import PyQt5.QtWidgets as QW
 import pyqtgraph as pg
 from widget_main import MainWindow
 from widget_region_pair import WidgetRegionPair
+from df_handler import DFHandler
 
 
 class ISedPyqt5(MainWindow):
@@ -14,16 +15,13 @@ class ISedPyqt5(MainWindow):
         self.x_sec = 0
         self.segment_length_sec = 1
         self.recommend_regions = []
+        self.df_handler = None
 
         # region
-        self.target_region_l = 0
+        self.target_region_l = 1
         self.target_region_r = 2
-        # self.target_region0 = pg.LinearRegionItem(
-        #                         brush='AA000044', pen='AA000044')
-        # self.target_region1 = pg.LinearRegionItem(
-        #                         brush='AA000044', pen='AA000044')
         self.target_region_pair = WidgetRegionPair(
-                                brush='AA000044', pen='AA000044')
+                                brush='0000AA44', pen='0000AA44')
 
         # bar
         self.bar_0 = pg.InfiniteLine(
@@ -57,6 +55,7 @@ class ISedPyqt5(MainWindow):
     def show_first_region(self):
         self.w_signal.p_pg0.addItem(self.target_region_pair.region0)
         self.w_signal.p_pg1.addItem(self.target_region_pair.region1)
+        self.df_handler = DFHandler(self.signal, self.sr)
 
     def update_target_region(self):
         print('\n--- update_target_region')
@@ -67,17 +66,20 @@ class ISedPyqt5(MainWindow):
 
     def first_recommend(self):
         print('\n--- first_recommend')
-        recommend_sec_list = self.get_recommend_sec()
-        half_region = self.segment_length_sec/2
+        left = self.target_region_l
+        right = self.target_region_r
+        self.df_handler.init_df_seg(left, right)
+        self.df_handler.update_df_seg(left, right, 'Positive')
+        # recommend_sec_list = self.get_recommend_sec()
+        # half_region = self.segment_length_sec/2
+        recommend_regions = self.df_handler.recommend_regions()
 
         # recommend
-        for i, rcmd_sec in enumerate(recommend_sec_list):
-            region = WidgetRegionPair(brush='AAAAAA40', pen='00000077')
+        for i, pos in enumerate(recommend_regions):
+            region = WidgetRegionPair(brush='AAAAAA40', pen='000000AA')
             region.set_id(i)
-            region.region0.setRegion(
-                            [rcmd_sec-half_region, rcmd_sec+half_region])
-            region.region1.setRegion(
-                            [rcmd_sec-half_region, rcmd_sec+half_region])
+            region.region0.setRegion([pos[0], pos[1]])
+            region.region1.setRegion([pos[0], pos[1]])
             self.w_signal.p_pg0.addItem(region.region0)
             self.w_signal.p_pg1.addItem(region.region1)
             self.recommend_regions.append(region)
@@ -89,82 +91,18 @@ class ISedPyqt5(MainWindow):
         self.target_region_pair.region0.setMovable(False)
         self.target_region_pair.region1.setMovable(False)
 
-    def get_recommend_sec(self):
-        print('\n--- get_recommend_regions')
-        seg_feats = self.get_segment_feats()
-        target_feat = self.get_target_feat()
-        seg_scores = self.calc_scores(target_feat, seg_feats)
+    def recommend(self):
+        print('\n--- recommend')
+        recommend_regions = self.df_handler.recommend_regions()
+        print(recommend_regions)
 
-        # calc recommend sec
-        signal = self.signal
-        sr = self.sr
-        segment_length_sec = self.segment_length_sec
-        n_seg = int(len(signal)/sr//segment_length_sec)
-        x_seg_sec = np.arange(segment_length_sec/2, n_seg, segment_length_sec)
-        idxs_recommend = np.argsort(seg_scores)[:5]
-        recommend_sec = x_seg_sec[idxs_recommend]
-        return recommend_sec
-
-    def get_target_feat(self):
-        print('\n--- get_target_feats')
-        left = self.target_region_l
-        right = self.target_region_r
-        signal = self.signal
-        sr = self.sr
-        self.x_sec = np.arange(0, len(signal))/sr
-        target_idxs = (left < self.x_sec) & (self.x_sec < right)
-        signal_target = signal[target_idxs]
-
-        target_feat = self.feature_extraction(signal_target)
-        target_feat = np.mean(target_feat, axis=0)
-        return target_feat
-
-    def get_segment_feats(self):
-        '''
-        segmentごとに特徴量を計算して、各segmentに1つの特徴量ベクトルを得る
-        '''
-        print('\n--- get_segment_feats')
-        signal = self.signal
-        sr = self.sr
-        segment_length_sec = self.segment_length_sec
-        n_seg = int(len(signal)/sr//segment_length_sec)
-        feat_list = []
-        for i_seg in range(0, n_seg):
-            start_idx = int(sr*i_seg)
-            end_idx = int(sr*(i_seg+segment_length_sec))
-            signal_seg = signal[start_idx:end_idx]
-            feats = self.feature_extraction(signal_seg)
-            feat_list.append(np.mean(feats, axis=0))
-        return np.array(feat_list)
-
-    def feature_extraction(self, signal):
-        feats = librosa.feature.mfcc(
-                    signal,
-                    sr=self.sr,
-                    n_fft=2048,
-                    hop_length=1024,
-                    n_mels=12)
-        return feats.T
-
-    def calc_scores(self, target_feat, seg_feats):
-        n_seg = seg_feats.shape[0]
-        scores = []
-        print(f'n_seg: {n_seg}')
-        for idx in range(n_seg):
-            # d(s, s_n) 対象セグメントとネガティブセグメント(ターゲット音以外)の最近傍距離
-            dists = np.linalg.norm(seg_feats - seg_feats[idx], axis=1)
-            min_dist_idx = np.argsort(dists)[1]
-            d_nega = dists[min_dist_idx]
-
-            # d(s, s_p) 対象セグメントとポジティブセグメント(ターゲット)の最近傍距離
-            # (今は1個なので、最近傍もクソもない)
-            d_posi = np.linalg.norm(seg_feats[idx] - target_feat)
-
-            # score
-            score = d_nega/(d_nega + d_posi)
-            scores.append(score)
-        scores = np.array(scores)
-        return scores
+        # recommend
+        for i, pos in enumerate(recommend_regions):
+            region = self.recommend_regions[i]
+            region.region0.setRegion([pos[0], pos[1]])
+            region.region1.setRegion([pos[0], pos[1]])
+            self.w_signal.p_pg0.addItem(region.region0)
+            self.w_signal.p_pg1.addItem(region.region1)
 
     def clicked_btn_find(self):
         '''
@@ -178,8 +116,8 @@ class ISedPyqt5(MainWindow):
         '''
         for i_region, region in enumerate(self.recommend_regions):
             class_ = region.class_
-            color_brush = 'AA000044' if class_ == 'Positive' else '0000AA44'
-            color_pen = 'AA0000AA' if class_ == 'Positive' else '0000AAAA'
+            color_brush = '0000AA44' if class_ == 'Positive' else 'AA000044'
+            color_pen = '0000AA44' if class_ == 'Positive' else 'AA000044'
             left, right = region.region0.getRegion()
             fix_region0 = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
             fix_region0.setRegion([left, right])
@@ -189,6 +127,11 @@ class ISedPyqt5(MainWindow):
             fix_region1.setMovable(False)
             self.w_signal.p_pg0.addItem(fix_region0)
             self.w_signal.p_pg1.addItem(fix_region1)
+
+            # df_seg を update
+            self.df_handler.update_df_seg(left, right, class_)
+
+        self.recommend()
 
     def clicked_btn_posi_nega(self):
         '''
