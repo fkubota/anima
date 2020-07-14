@@ -81,25 +81,40 @@ class DFHandler:
 
         # 領域前後の特徴量がNaNになるようにする
         seg_starts_sec = self.df_seg['seg_start_sec'].values
+        lbls = self.df_seg['label'].values
+
+        # before
         idxs = seg_starts_sec == start_sec
         idx_before = self.df_seg[idxs].index.values[0] - 1
-        sec_before = self.df_seg.iloc[idx_before, :]['seg_start_sec']
+        if ((lbls[idx_before] != 'Negative') &
+           (lbls[idx_before] != 'Positive') &
+           (idx_before != -1)):
+            sec_before = self.df_seg.iloc[idx_before, :]['seg_start_sec']
+            self.df_seg = self.df_seg.drop(index=idx_before)
+            _df = pd.DataFrame(
+                {'seg_start_sec': [sec_before],
+                 'label': ['None']})
+            self.df_seg = pd.concat(
+                            [self.df_seg, _df]).sort_values('seg_start_sec')
+            self.df_seg = self.df_seg.reset_index(drop=True)
+
+        # after
         idxs = seg_starts_sec == end_sec
         idx_after = self.df_seg[idxs].index.values[0] + 1
-        sec_after = self.df_seg.iloc[idx_after, :]['seg_start_sec']
-
-        # 領域前後のセグメントを削除
-        self.df_seg = self.df_seg.drop(index=[idx_before, idx_after])
-
-        # 領域前後の要素を挿入(特徴量はNaNになる)
-        _df = pd.DataFrame(
-            {'seg_start_sec': [sec_before, sec_after],
-             'label': ['None', 'None']})
-        self.df_seg = pd.concat(
-                        [self.df_seg, _df]).sort_values('seg_start_sec')
-        self.df_seg = self.df_seg.reset_index(drop=True)
+        if ((lbls[idx_after] != 'Negative') &
+           (lbls[idx_after] != 'Positive') &
+           (idx_after < len(lbls))):
+            sec_after = self.df_seg.iloc[idx_after, :]['seg_start_sec']
+            self.df_seg = self.df_seg.drop(index=idx_after)
+            _df = pd.DataFrame(
+                {'seg_start_sec': [sec_after],
+                 'label': ['None']})
+            self.df_seg = pd.concat(
+                            [self.df_seg, _df]).sort_values('seg_start_sec')
+            self.df_seg = self.df_seg.reset_index(drop=True)
 
         # NaNがある部分は再計算する
+        self.df_seg = self.df_seg.reset_index(drop=True)
         idxs = self.df_seg['mfcc_1'].isna().values
         starts_sec = self.df_seg[idxs]['seg_start_sec'].values
         df_feats = pd.DataFrame()
@@ -107,7 +122,10 @@ class DFHandler:
             # segment
             idxs = self.df_seg['seg_start_sec'].values == start_sec
             idx = self.df_seg[idxs].index.values[0]
-            end_sec = self.df_seg[
+            if len(self.df_seg) <= (idx+1):
+                end_sec = len(self.signal)/self.sr
+            else:
+                end_sec = self.df_seg[
                         self.df_seg.index == idx+1]['seg_start_sec'].values[0]
             label = self.df_seg[
                         self.df_seg.index == idx]['label'].values[0]
@@ -201,9 +219,13 @@ class DFHandler:
         recommend_regions = []
         for idx in sorted(top5_idxs):
             st_idx = idx
-            ed_idx = idx + 1
             st_sec = self.df_rel['seg_start_sec'].values[st_idx]
-            ed_sec = self.df_rel['seg_start_sec'].values[ed_idx]
+
+            if len(self.df_seg) == (idx + 1):
+                ed_sec = len(self.signal)/self.sr
+            else:
+                ed_idx = idx + 1
+                ed_sec = self.df_rel['seg_start_sec'].values[ed_idx]
             recommend_regions.append([st_sec, ed_sec])
         return recommend_regions
 
