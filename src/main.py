@@ -37,6 +37,8 @@ class ISedPyqt5(MainWindow):
         self.w_mp.player.setNotifyInterval(100)
         self.w_signal.p_pg0.addItem(self.bar_0)
         self.w_signal.p_pg1.addItem(self.bar_1)
+        self.bar_0.setZValue(20)
+        self.bar_1.setZValue(20)
 
     def init_event(self):
         self.target_region_pair.region0.sigRegionChanged.connect(
@@ -94,10 +96,11 @@ class ISedPyqt5(MainWindow):
     def recommend(self):
         print('\n--- recommend')
         recommend_regions = self.df_handler.recommend_regions()
-        print(recommend_regions)
+        print(self.df_handler.df_rel.head(20))
 
         # recommend
         for i, pos in enumerate(recommend_regions):
+            print(pos)
             region = self.recommend_regions[i]
             region.region0.setRegion([pos[0], pos[1]])
             region.region1.setRegion([pos[0], pos[1]])
