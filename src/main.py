@@ -57,8 +57,10 @@ class ISedPyqt5(MainWindow):
         self.bar_0.sigPositionChanged.connect(self.update_bar_pos)
         self.bar_1.sigPositionChanged.connect(self.update_bar_pos)
         self.w_list.list.itemClicked.connect(self.clicked_listitem)
-        self.w_signal.p_pg0.scene().sigMouseClicked.connect(self.clicked_window)
-        self.w_signal.p_pg1.scene().sigMouseClicked.connect(self.clicked_window)
+        self.w_signal.p_pg0.scene().sigMouseClicked.connect(
+                                            self.clicked_window)
+        self.w_signal.p_pg1.scene().sigMouseClicked.connect(
+                                            self.clicked_window)
 
     def show_first_region(self):
         self.w_signal.p_pg0.addItem(self.target_region_pair.region0)
@@ -113,6 +115,9 @@ class ISedPyqt5(MainWindow):
             self.w_signal.p_pg0.addItem(region.region0)
             self.w_signal.p_pg1.addItem(region.region1)
 
+            # init recomment list
+            self.w_list.list.item(i).setText(f'Region #{i}')
+
     def clicked_btn_find(self):
         '''
         findボタンがクリックされたら動く。
@@ -126,9 +131,9 @@ class ISedPyqt5(MainWindow):
         # 音楽一時停止
         self.w_mp.pause_handler()
         for i_region, region in enumerate(self.recommend_regions):
-            class_ = region.class_
-            color_brush = '0000AA44' if class_ == 'Positive' else 'AA000044'
-            color_pen = '0000AA44' if class_ == 'Positive' else 'AA000044'
+            label = region.label
+            color_brush = '0000AA44' if label == 'Positive' else 'AA000044'
+            color_pen = '0000AA44' if label == 'Positive' else 'AA000044'
             left, right = region.region0.getRegion()
             fix_region0 = pg.LinearRegionItem(brush=color_brush, pen=color_pen)
             fix_region0.setRegion([left, right])
@@ -140,9 +145,12 @@ class ISedPyqt5(MainWindow):
             self.w_signal.p_pg1.addItem(fix_region1)
 
             # df_seg を update
-            self.df_handler.update_df_seg(left, right, class_)
+            self.df_handler.update_df_seg(left, right, label)
 
         self.recommend()
+
+    def check_region_label(self):
+        pass
 
     def clicked_btn_posi_nega(self):
         '''
@@ -210,6 +218,7 @@ class ISedPyqt5(MainWindow):
         self.w_mp.play_handler()
 
     def clicked_window(self, event):
+        self.w_mp.pause_handler()
         pos = event.scenePos()
         if pos[1] < 150:
             mousePoint = self.w_signal.p_pg0.vb.mapSceneToView(pos)
@@ -217,6 +226,8 @@ class ISedPyqt5(MainWindow):
         else:
             mousePoint = self.w_signal.p_pg1.vb.mapSceneToView(pos)
             self.bar_1.setPos(mousePoint.x())
+
+        self.w_mp.play_handler()
 
 
 def main():

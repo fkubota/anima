@@ -12,7 +12,7 @@ class WidgetRegionPair(QW.QWidget):
     def __init__(self, brush, pen):
         super(WidgetRegionPair, self).__init__()
         self.id = None
-        self.class_ = None
+        self.label = None
         self.region0 = pg.LinearRegionItem(brush=brush, pen=pen)
         self.region1 = pg.LinearRegionItem(brush=brush, pen=pen)
 
@@ -26,8 +26,8 @@ class WidgetRegionPair(QW.QWidget):
     def set_id(self, id_):
         self.id = id_
 
-    def set_class(self, class_):
-        self.class_ = class_
+    def set_class(self, label):
+        self.label = label
 
     def update_pos(self):
         sender = self.sender()

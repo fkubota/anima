@@ -1,7 +1,10 @@
+import sys
 import pandas as pd
 import librosa
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+import PyQt5.QtWidgets as QW
+from widget_pbar import WidgetProgressBar
 
 
 class DFHandler:
@@ -13,6 +16,8 @@ class DFHandler:
         self.seg_length_sec = 0
         self.feat_names = [f'mfcc_{i+1}' for i in range(12)]
         self.scaler = StandardScaler()
+        self.w_pbar = WidgetProgressBar()
+        # self.w_pbar.show()
 
     def init_df_seg(self, start_sec, end_sec):
         '''
@@ -37,8 +42,12 @@ class DFHandler:
         self.df_seg['label'] = 'None'
 
         # 特徴量を作成
+        self.w_pbar.lbl.setText('特徴量を計算しています')
+        self.w_pbar.pbar.setMaximum(self.n_seg)
+        self.w_pbar.show()
         df_feats = pd.DataFrame(columns=self.feat_names)
         for i in range(self.n_seg):
+            QW.QApplication.processEvents()
             seg_start_sec = self.df_seg['seg_start_sec'].values[i]
             seg_end_sec = seg_start_sec + self.seg_length_sec
 
@@ -49,6 +58,10 @@ class DFHandler:
             _df_feats = pd.DataFrame([feats], columns=self.feat_names)
             df_feats = pd.concat(
                         [df_feats, _df_feats], axis=0).reset_index(drop=True)
+
+            # progress
+            self.w_pbar.pbar.setValue(i)
+        self.w_pbar.close()
 
         # self.scaler.fit(df_feats)
         feats = self.scaler.fit_transform(df_feats)
@@ -121,9 +134,6 @@ class DFHandler:
                             [self.df_seg, _df]).sort_values('seg_start_sec')
                 self.df_seg = self.df_seg.reset_index(drop=True)
 
-        # ====================
-        #  ここから上は機能してるっぽい
-        # ====================
         # NaNがある部分は再計算する
         self.df_seg = self.df_seg.reset_index(drop=True)
         idxs = self.df_seg['mfcc_1'].isna().values
@@ -256,6 +266,7 @@ class DFHandler:
 
 
 def main():
+    app = QW.QApplication(sys.argv)
     print(' ========================= start =========================')
     filename = librosa.util.example_audio_file()
     signal, sr = librosa.load(filename, sr=None)
@@ -275,6 +286,7 @@ def main():
 
     print('----------------======================*************4')
     print(df_handler.recommend_regions())
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
