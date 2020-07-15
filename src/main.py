@@ -1,7 +1,6 @@
 import sys
-import numpy as np
-import librosa
 import PyQt5.QtWidgets as QW
+import PyQt5.QtMultimedia as QM
 import pyqtgraph as pg
 from widget_main import MainWindow
 from widget_region_pair import WidgetRegionPair
@@ -39,6 +38,10 @@ class ISedPyqt5(MainWindow):
         self.w_signal.p_pg1.addItem(self.bar_1)
         self.bar_0.setZValue(20)
         self.bar_1.setZValue(20)
+        self.bar_0.addMarker('v', position=1, size=10)
+        self.bar_0.addMarker('^', position=0, size=10)
+        self.bar_1.addMarker('v', position=1, size=10)
+        self.bar_1.addMarker('^', position=0, size=10)
 
     def init_event(self):
         self.target_region_pair.region0.sigRegionChanged.connect(
@@ -53,6 +56,9 @@ class ISedPyqt5(MainWindow):
         self.w_mp.player.positionChanged.connect(self.player_position_changed)
         self.bar_0.sigPositionChanged.connect(self.update_bar_pos)
         self.bar_1.sigPositionChanged.connect(self.update_bar_pos)
+        self.w_list.list.itemClicked.connect(self.clicked_listitem)
+        self.w_signal.p_pg0.scene().sigMouseClicked.connect(self.clicked_window)
+        self.w_signal.p_pg1.scene().sigMouseClicked.connect(self.clicked_window)
 
     def show_first_region(self):
         self.w_signal.p_pg0.addItem(self.target_region_pair.region0)
@@ -96,14 +102,14 @@ class ISedPyqt5(MainWindow):
     def recommend(self):
         print('\n--- recommend')
         recommend_regions = self.df_handler.recommend_regions()
-        print(self.df_handler.df_rel.head(20))
 
         # recommend
         for i, pos in enumerate(recommend_regions):
-            print(pos)
             region = self.recommend_regions[i]
             region.region0.setRegion([pos[0], pos[1]])
             region.region1.setRegion([pos[0], pos[1]])
+            region.region0.setBrush('AAAAAA40')
+            region.region1.setBrush('AAAAAA40')
             self.w_signal.p_pg0.addItem(region.region0)
             self.w_signal.p_pg1.addItem(region.region1)
 
@@ -117,6 +123,8 @@ class ISedPyqt5(MainWindow):
         5. レコメンドリストを初期化。
         6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
         '''
+        # 音楽一時停止
+        self.w_mp.pause_handler()
         for i_region, region in enumerate(self.recommend_regions):
             class_ = region.class_
             color_brush = '0000AA44' if class_ == 'Positive' else 'AA000044'
@@ -144,8 +152,12 @@ class ISedPyqt5(MainWindow):
         row = self.w_list.list.currentRow()
         if sender.text() == 'Positive':
             text = 'Positive'
+            self.recommend_regions[row].region0.setBrush('0000AA44')
+            self.recommend_regions[row].region1.setBrush('0000AA44')
         elif sender.text() == 'Negative':
             text = 'Negative'
+            self.recommend_regions[row].region0.setBrush('AA000044')
+            self.recommend_regions[row].region1.setBrush('AA000044')
 
         self.recommend_regions[row].set_class(text)
         btn_text = f'Region #{row} ---> {text}'
@@ -168,8 +180,43 @@ class ISedPyqt5(MainWindow):
         elif sender == self.bar_1:
             self.bar_0.setPos(pos)
 
-        # musicplayerの再生位置の調整
-        self.w_mp.player.setPosition(pos*1000)  # ms 単位で渡す
+        if self.w_mp.player.state() != QM.QMediaPlayer.PlayingState:
+            # musicplayerの再生位置の調整
+            self.w_mp.player.setPosition(pos*1000)  # ms 単位で渡す
+
+    def clicked_listitem(self):
+        '''
+        クリックした対象のリージョンにジャンプする
+        focus regoin の中心を対象領域とするようにする
+        '''
+        row = self.w_list.list.currentRow()
+        region = self.recommend_regions[row].region0
+        left, right = region.getRegion()
+        half_width_rcmd = (left - right)/2
+
+        # focus を移動させる
+        region_focus = self.w_signal.focus_region
+        left_focus, right_focus = region_focus.getRegion()
+        half_width = (right_focus - left_focus)/2
+        new_left = (left - half_width_rcmd) - half_width
+        new_right = (left - half_width_rcmd) + half_width
+        region_focus.setRegion([new_left, new_right])
+
+        # barを移動させる
+        self.w_mp.pause_handler()
+        self.bar_0.setPos(left)
+
+        # 再生
+        self.w_mp.play_handler()
+
+    def clicked_window(self, event):
+        pos = event.scenePos()
+        if pos[1] < 150:
+            mousePoint = self.w_signal.p_pg0.vb.mapSceneToView(pos)
+            self.bar_0.setPos(mousePoint.x())
+        else:
+            mousePoint = self.w_signal.p_pg1.vb.mapSceneToView(pos)
+            self.bar_1.setPos(mousePoint.x())
 
 
 def main():

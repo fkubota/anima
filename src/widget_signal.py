@@ -20,6 +20,7 @@ class WidgetSignal(QW.QWidget):
         self.init_event()
 
     def init_ui(self):
+        self.setFixedHeight(350)
         self.w_pg_signal.setBackground('#FFFFFF00')
         self.p_pg0.setMouseEnabled(x=False, y=False)
         self.p_pg1.setMouseEnabled(x=True, y=False)
@@ -43,6 +44,8 @@ class WidgetSignal(QW.QWidget):
     def init_event(self):
         self.p_pg1.sigRangeChanged.connect(self.update_pg1_range)
         self.focus_region.sigRegionChanged.connect(self.update_focus)
+        self.p_pg0.scene().sigMouseClicked.connect(self.clicked_window)
+        self.p_pg1.scene().sigMouseClicked.connect(self.clicked_window)
 
     def update_plot(self):
         self.pg_signal0.setData(self.x, self.y)
@@ -64,6 +67,15 @@ class WidgetSignal(QW.QWidget):
     def update_pg1_range(self, window, view_range):
         rgn = view_range[0]
         self.focus_region.setRegion(rgn)
+
+    def clicked_window(self, event):
+        pos = event.scenePos()
+        print(pos[1])
+        if pos[1] < 150:
+            mousePoint = self.p_pg0.vb.mapSceneToView(pos)
+        else:
+            mousePoint = self.p_pg1.vb.mapSceneToView(pos)
+        print(mousePoint.x())
 
 
 def main():

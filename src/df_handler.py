@@ -94,9 +94,6 @@ class DFHandler:
         # before
         idxs = seg_starts_sec == start_sec
         idx_before = self.df_seg[idxs].index.values[0] - 1
-        print('NaNにする前', idx_before)
-        print(lbls[idx_before])
-        print(self.df_seg.head())
         if (idx_before != -1):
             if ((lbls[idx_before] != 'Negative') &
                (lbls[idx_before] != 'Positive')):
@@ -132,14 +129,11 @@ class DFHandler:
         idxs = self.df_seg['mfcc_1'].isna().values
         starts_sec = self.df_seg[idxs]['seg_start_sec'].values
         df_feats = pd.DataFrame()
-        print('NaNの部分を再計算')
-        print(self.df_seg.head())
         for i, st_sec in enumerate(starts_sec):
             if st_sec == len(self.signal)/self.sr:
                 continue
             # segment
             idxs = self.df_seg['seg_start_sec'].values == st_sec
-            print(idxs)
             idx = self.df_seg[idxs].index.values[0]
             if len(self.df_seg) <= (idx+1):
                 ed_sec = len(self.signal)/self.sr
@@ -152,7 +146,6 @@ class DFHandler:
             # signal
             time = np.arange(0, len(self.signal))/self.sr
             idxs = (st_sec <= time) & (time < ed_sec)
-            print(st_sec, end_sec)
             feats = self.feature_extraction(self.signal[idxs])
             feats = self.scaler.transform([feats]).T[:, 0]
             _df_feats = pd.DataFrame([feats], columns=self.feat_names)
