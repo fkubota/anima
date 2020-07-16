@@ -4,6 +4,8 @@ import PyQt5.QtWidgets as QW
 from widget_signal import WidgetSignal
 from widget_recommend_list import WidgetRecommendList
 from widget_music_player import WidgetMusicPlayer
+from widget_export import WidgetExport
+
 
 ICON = './../data/icon_file/'
 
@@ -20,6 +22,7 @@ class MainWindow(QW.QMainWindow):
         self.w_signal = WidgetSignal()
         self.w_list = WidgetRecommendList()
         self.w_mp = WidgetMusicPlayer()
+        self.w_export = WidgetExport()
         self.lbl_file = QW.QLabel('No File Chosen')
         self.btn_open = QW.QPushButton('Open')
         self.btn_recommend = QW.QPushButton('recommend')
@@ -39,13 +42,26 @@ class MainWindow(QW.QMainWindow):
         hbox0 = QW.QHBoxLayout()
         hbox0.addWidget(self.btn_open)
         hbox0.addWidget(self.lbl_file)
+
         vbox0 = QW.QVBoxLayout()
         vbox0.addLayout(hbox0)
         vbox0.addWidget(self.w_signal)
         vbox0.addWidget(self.btn_recommend)
-        vbox0.addWidget(self.w_mp)
-        vbox0.addWidget(self.w_list)
-        self.w0.setLayout(vbox0)
+
+        vbox1 = QW.QVBoxLayout()
+        vbox1.addWidget(self.w_mp)
+        vbox1.addWidget(self.w_list)
+
+        hbox1 = QW.QHBoxLayout()
+        hbox1.addLayout(vbox1)
+        hbox1.addWidget(self.w_export)
+        hbox1.addStretch()
+
+        vbox2 = QW.QVBoxLayout()
+        vbox2.addLayout(vbox0)
+        vbox2.addLayout(hbox1)
+
+        self.w0.setLayout(vbox2)
 
     def clicked_btn_open(self):
         '''

@@ -80,8 +80,6 @@ class ISedPyqt5(MainWindow):
         right = self.target_region_r
         self.df_handler.init_df_seg(left, right)
         self.df_handler.update_df_seg(left, right, 'Positive')
-        # recommend_sec_list = self.get_recommend_sec()
-        # half_region = self.segment_length_sec/2
         recommend_regions = self.df_handler.recommend_regions()
 
         # recommend
@@ -108,6 +106,8 @@ class ISedPyqt5(MainWindow):
         # recommend
         for i, pos in enumerate(recommend_regions):
             region = self.recommend_regions[i]
+            if region.label == 'Positive':
+                self.w_export.add_label(pos[0], pos[1])
             region.region0.setRegion([pos[0], pos[1]])
             region.region1.setRegion([pos[0], pos[1]])
             region.region0.setBrush('AAAAAA40')
