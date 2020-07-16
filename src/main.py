@@ -112,6 +112,7 @@ class ISedPyqt5(MainWindow):
             region.region1.setRegion([pos[0], pos[1]])
             region.region0.setBrush('AAAAAA40')
             region.region1.setBrush('AAAAAA40')
+            region.set_label(label='None')
             self.w_signal.p_pg0.addItem(region.region0)
             self.w_signal.p_pg1.addItem(region.region1)
 
@@ -128,6 +129,20 @@ class ISedPyqt5(MainWindow):
         5. レコメンドリストを初期化。
         6. 次のリージョンをレコメンド(レコメンドリージョンは使いまわす)。
         '''
+        # リージョン全てにラベルが割り振られているか確認
+        is_all_labeled = self.check_region_label()
+        if is_all_labeled:
+            pass
+        else:
+            w_alert = QW.QMessageBox.warning(
+                                        None,
+                                        'alert',
+                                        '振られていないラベルがあります',
+                                        QW.QMessageBox.Ok)
+            w_alert.move(500, 500)
+            w_alert.show()
+            return
+
         # 音楽一時停止
         self.w_mp.pause_handler()
         for i_region, region in enumerate(self.recommend_regions):
@@ -150,7 +165,11 @@ class ISedPyqt5(MainWindow):
         self.recommend()
 
     def check_region_label(self):
-        pass
+        is_all_labeled = True
+        for i_region, region in enumerate(self.recommend_regions):
+            if region.label == 'None':
+                is_all_labeled = False
+        return is_all_labeled
 
     def clicked_btn_posi_nega(self):
         '''
@@ -167,7 +186,7 @@ class ISedPyqt5(MainWindow):
             self.recommend_regions[row].region0.setBrush('AA000044')
             self.recommend_regions[row].region1.setBrush('AA000044')
 
-        self.recommend_regions[row].set_class(text)
+        self.recommend_regions[row].set_label(text)
         btn_text = f'Region #{row} ---> {text}'
         self.w_list.list.item(row).setText(btn_text)
 
