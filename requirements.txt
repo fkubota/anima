@@ -9,3 +9,4 @@ scipy==1.5.1
 numba==0.48.0
 pygame==1.9.6
 pandas==1.0.5
+pyinstaller==3.6
