@@ -190,8 +190,11 @@ class DFHandler:
         df_seg から、df_relを計算
         df_relのcolumns: ['seg_start_sec', 'label', 'relevance']
         '''
+
+        # weight の計算
+        w = self.calc_wegiht()
+
         relevances = []
-        # seg_starts_sec = []
         for idx in range(len(self.df_seg)):
             # 自分とその他のデータフレームに分ける
             df_me = self.df_seg.iloc[[idx], :]
@@ -211,7 +214,8 @@ class DFHandler:
             feat_me = df_me.drop(['seg_start_sec', 'label'], axis=1).values
             feat_other = df_other.drop(
                             ['seg_start_sec', 'label'], axis=1).values
-            dist = np.linalg.norm(feat_other - feat_me, axis=1)
+            # dist = np.linalg.norm(feat_other - feat_me, axis=1)
+            dist = np.sqrt((np.power(feat_other - feat_me, 2)*w).sum())
 
             # 距離とラベルの結合
             df_label_dist = pd.DataFrame()
@@ -240,6 +244,25 @@ class DFHandler:
         self.df_rel['seg_start_sec'] = self.df_seg['seg_start_sec'].values
         self.df_rel['label'] = self.df_seg['label'].values
         self.df_rel['relevance'] = relevances
+
+    def calc_wegiht(self):
+        labels = self.df_seg['label'].values
+
+        if 'Negative' not in labels:
+            w = 1
+            return 1
+        idxs = self.df_seg['label'].values == 'Positive'
+        df_p = self.df_seg[idxs].drop(['seg_start_sec', 'label'], axis=1)
+        idxs = self.df_seg['label'].values == 'Negative'
+        df_n = self.df_seg[idxs].drop(['seg_start_sec', 'label'], axis=1)
+
+        posi_mean = df_p.mean(axis=0)
+        posi_std = np.std(df_p, axis=0)
+        nega_mean = df_n.mean(axis=0)
+        nega_std = np.std(df_n, axis=0)
+        w = (posi_mean - nega_mean)**2 / (posi_std ** 2 + nega_std ** 2)
+        w = w.values
+        return w
 
     def recommend_regions(self):
         self.calc_df_rel()
@@ -276,11 +299,11 @@ def main():
     print('----------------======================*************1')
     print(df_handler.df_seg.head(10))
 
-    df_handler.update_df_seg(1.1, 2.7, 'Negative')
+    df_handler.update_df_seg(1.5, 2.7, 'Negative')
     print('----------------======================*************2')
     print(df_handler.df_seg.head(10))
 
-    df_handler.update_df_seg(5.2, 6.0, 'Positive')
+    df_handler.update_df_seg(3.2, 4.0, 'Positive')
     print('----------------======================*************3')
     print(df_handler.df_seg.head(10))
 
