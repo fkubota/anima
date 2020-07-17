@@ -15,7 +15,7 @@ class WidgetExport(QW.QWidget):
         self.init_event()
 
     def init_ui(self):
-        self.setFixedWidth(200)
+        self.setFixedWidth(500)
         self.lbl.setText('Positive Label (sec)')
         self.table.setHorizontalHeaderLabels(['left', 'right'])
 
