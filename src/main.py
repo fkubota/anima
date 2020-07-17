@@ -106,8 +106,6 @@ class ISedPyqt5(MainWindow):
         # recommend
         for i, pos in enumerate(recommend_regions):
             region = self.recommend_regions[i]
-            if region.label == 'Positive':
-                self.w_export.add_label(pos[0], pos[1])
             region.region0.setRegion([pos[0], pos[1]])
             region.region1.setRegion([pos[0], pos[1]])
             region.region0.setBrush('AAAAAA40')
@@ -158,6 +156,10 @@ class ISedPyqt5(MainWindow):
             fix_region1.setMovable(False)
             self.w_signal.p_pg0.addItem(fix_region0)
             self.w_signal.p_pg1.addItem(fix_region1)
+
+            # export tableに追加
+            if label == 'Positive':
+                self.w_export.add_label(left, right)
 
             # df_seg を update
             self.df_handler.update_df_seg(left, right, label)
