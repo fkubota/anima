@@ -14,10 +14,13 @@ class DFHandler:
         self.signal = signal
         self.sr = sr
         self.seg_length_sec = 0
-        self.feat_names = [f'mfcc_{i+1}' for i in range(12)]
         self.scaler = StandardScaler()
         self.w_pbar = WidgetProgressBar()
-        # self.w_pbar.show()
+        self.feat_names = [
+                'mfcc_1', 'mfcc_2', 'mfcc_3', 'mfcc_4', 'mfcc_5', 'mfcc_6',
+                'mfcc_7', 'mfcc_8', 'mfcc_9', 'mfcc_10', 'mfcc_11', 'mfcc_12',
+                'centroid', 'band_width', 'rolloff', 'zcr'
+                ]
 
     def init_df_seg(self, start_sec, end_sec):
         '''
@@ -176,13 +179,44 @@ class DFHandler:
     def feature_extraction(self, signal):
         n_fft = int(self.sr/10)
         hop_length = int(n_fft/2)
-        feats = librosa.feature.mfcc(
+        mfcc = librosa.feature.mfcc(
                                 y=signal,
                                 sr=self.sr,
                                 n_mels=12,
                                 n_fft=n_fft,
-                                hop_length=hop_length)
-        feats = pd.DataFrame(feats.T).mean(axis=0).values
+                                hop_length=hop_length
+                                ).T
+        centroid = librosa.feature.spectral_centroid(
+                                y=signal,
+                                sr=self.sr,
+                                n_fft=n_fft,
+                                hop_length=hop_length,
+                                ).T
+        band_width = librosa.feature.spectral_bandwidth(
+                                y=signal,
+                                sr=self.sr,
+                                n_fft=n_fft,
+                                hop_length=hop_length,
+                                ).T
+        rolloff = librosa.feature.spectral_rolloff(
+                                y=signal,
+                                sr=self.sr,
+                                n_fft=n_fft,
+                                hop_length=hop_length,
+                                ).T
+        zcr = librosa.feature.zero_crossing_rate(
+                                y=signal,
+                                hop_length=hop_length,
+                                ).T
+        print(mfcc.shape, centroid.shape, band_width.shape, rolloff.shape, zcr.shape)
+        feats = np.hstack([
+                        mfcc,
+                        centroid,
+                        band_width,
+                        rolloff,
+                        zcr,
+                        ])
+        feats = pd.DataFrame(feats).mean(axis=0).values
         return feats
 
     def calc_df_rel(self):
