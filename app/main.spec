@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['../src/main.py'],
+a = Analysis(['../src/anima.py'],
              pathex=['/home/fkubota/Git/i-sed-pyqt5/app'],
              binaries=[],
              datas=[],
