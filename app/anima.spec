@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['../src/anima.py'],
-             pathex=['/home/fkubota/Git/i-sed-pyqt5/app'],
+             pathex=['/home/fkubota/Git/anima/app'],
              binaries=[],
              datas=[],
              hiddenimports=['pkg_resources.py2_warn', 'scipy.special.cython_special', 'sklearn.utils._cython_blas', 'sklearn.neighbors._typedefs', 'sklearn.neighbors._quad_tree', 'sklearn.tree', 'sklearn.tree._utils'],
@@ -22,7 +22,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='main',
+          name='anima',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -35,5 +35,5 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main',
-			   console=False , icon='../data/design/icon.ico'))
+               name='anima',
+			   console=False , icon='../data/design/icon.ico')

@@ -7,9 +7,9 @@ from widget_region_pair import WidgetRegionPair
 from df_handler import DFHandler
 
 
-class ISedPyqt5(MainWindow):
+class Anima(MainWindow):
     def __init__(self, parent=None):
-        super(ISedPyqt5, self).__init__(parent)
+        super(Anima, self).__init__(parent)
 
         self.x_sec = 0
         self.segment_length_sec = 1
@@ -254,7 +254,7 @@ class ISedPyqt5(MainWindow):
 def main():
     app = QW.QApplication(sys.argv)
 
-    w = ISedPyqt5()
+    w = Anima()
     w.move(300, 500)
     w.show()
     sys.exit(app.exec_())
