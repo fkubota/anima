@@ -2,7 +2,7 @@
  True,
  False,
  True,
- None,
+ 'icon.ico',
  None,
  False,
  False,
@@ -62,7 +62,7 @@
  [],
  False,
  False,
- 1595210257,
+ 1595226513,
  [('run',
    '/home/fkubota/.local/lib/python3.6/site-packages/PyInstaller/bootloader/Linux-64bit/run',
    'EXECUTABLE')])
