@@ -15,6 +15,7 @@ a = Analysis(['../src/anima.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+a.datas += [('icon.ico','../data/design/icon.ico','DATA')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
@@ -34,4 +35,5 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main')
+               name='main',
+			   console=False , icon='../data/design/icon.ico'))
