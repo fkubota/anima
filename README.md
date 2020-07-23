@@ -18,7 +18,7 @@
     - 手順
         1. リポジトリをクローンする
         1. `chmod u+x i-sed-pyqt5/app/dist/main/main`  <--- 実行権限付与
-        1. `./i-sed-pyqt5/app/dist/main/main`  <--- 実行
+        1. `./i-sed-pyqt5/app/dist/anima/anima`  <--- 実行
 
 - developer 向けの説明
     - また今度書くやで
